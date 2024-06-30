@@ -5,6 +5,10 @@ import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import sweet.dh.apiserver.domain.Todo;
 
@@ -39,8 +43,8 @@ public class TodoRepositoryTest {
                 .build();
 
         todoRepository.save(todo);
-        assertNotNull(todo.getId());
-        log.info("Saved Todo: {}", todo.getId());
+        assertNotNull(todo.getTno());
+        log.info("Saved Todo: {}", todo.getTno());
     }
 
     @Test
@@ -69,5 +73,36 @@ public class TodoRepositoryTest {
         assertEquals("Test Title2", findedTodo.getTitle());
         assertEquals("Test Content2", findedTodo.getContent());
         log.info("findedTodo Todo: {}", todo);
+    }
+
+    public void insertTodos() {
+        //make 100 Todos
+        for (int i = 0; i < 100; i++) {
+            Todo todo = Todo.builder()
+                   .title("Test Title " + i)
+                   .content("Test Content " + i)
+                   .complete(i % 2 == 0)
+                   .dueDate(LocalDate.now().plusDays(i))
+                   .build();
+            todoRepository.save(todo);
+        }
+    }
+
+    @Test
+    public void testPaging() {
+        insertTodos();
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("title").ascending());
+        Page<Todo> results = todoRepository.findAll(pageable);
+
+        assertNotNull(results);
+        log.info("end page num : {}", results.getTotalPages());
+        log.info("total todo size: {}", results.getTotalElements());
+    }
+
+    @Test
+    public void testSearch() {
+        insertTodos();
+
+        Page<Todo> todos = todoRepository.search1();
     }
 }

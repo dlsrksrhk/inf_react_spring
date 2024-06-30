@@ -18,7 +18,7 @@ public class Todo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long tno;
     private String title;
     private String content;
     private boolean complete;
